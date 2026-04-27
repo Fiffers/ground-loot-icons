@@ -62,6 +62,8 @@ public class GroundLootIconOverlay extends Overlay
 		MenuEntry[] entries = menu.getMenuEntries();
 		int menuX = menu.getMenuX();
 		int menuY = menu.getMenuY();
+		int menuHeight = menu.getMenuHeight();
+		int scroll = this.client.isMenuScrollable() ? this.client.getMenuScroll() : 0;
 
 		graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -90,8 +92,16 @@ public class GroundLootIconOverlay extends Overlay
 			int optionWidth = metrics.stringWidth(plainOption + " ");
 
 			int rowIndexFromTop = entries.length - 1 - i;
+			int visibleRowIndex = rowIndexFromTop - scroll;
 			int drawX = menuX + GroundLootIconOverlay.LEFT_PADDING + optionWidth + GroundLootIconOverlay.ICON_X_OFFSET;
-			int drawY = menuY + GroundLootIconOverlay.HEADER_HEIGHT + rowIndexFromTop * GroundLootIconOverlay.ROW_HEIGHT;
+			int drawY = menuY + GroundLootIconOverlay.HEADER_HEIGHT + visibleRowIndex * GroundLootIconOverlay.ROW_HEIGHT;
+
+			boolean isAboveVisibleArea = drawY < menuY + GroundLootIconOverlay.HEADER_HEIGHT;
+			boolean isBelowVisibleArea = drawY + GroundLootIconOverlay.ICON_HEIGHT > menuY + menuHeight;
+			if (isAboveVisibleArea || isBelowVisibleArea)
+			{
+				continue;
+			}
 
 			graphics.drawImage(icon, drawX, drawY, GroundLootIconOverlay.ICON_WIDTH, GroundLootIconOverlay.ICON_HEIGHT, null);
 		}
