@@ -4,13 +4,10 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.util.EnumSet;
-import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
 import net.runelite.api.Menu;
-import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.FontManager;
@@ -18,18 +15,10 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.util.AsyncBufferedImage;
-import net.runelite.client.util.Text;
 
 @Singleton
 public class GroundLootIconOverlay extends Overlay
 {
-	private static final Set<MenuAction> GROUND_ITEM_ACTIONS = EnumSet.of(
-		MenuAction.GROUND_ITEM_FIRST_OPTION,
-		MenuAction.GROUND_ITEM_SECOND_OPTION,
-		MenuAction.GROUND_ITEM_THIRD_OPTION,
-		MenuAction.GROUND_ITEM_FOURTH_OPTION,
-		MenuAction.GROUND_ITEM_FIFTH_OPTION,
-		MenuAction.EXAMINE_ITEM_GROUND);
 
 	private static final int HEADER_HEIGHT = 19;
 	private static final int ROW_HEIGHT = 15;
@@ -68,28 +57,20 @@ public class GroundLootIconOverlay extends Overlay
 		graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
+		FontMetrics metrics = graphics.getFontMetrics(FontManager.getRunescapeFont());
+		int optionWidth = metrics.stringWidth("Take ");
+
 		for (int i = 0; i < entries.length; i++)
 		{
 			MenuEntry entry = entries[i];
 
-			boolean isGroundItemAction = GroundLootIconOverlay.GROUND_ITEM_ACTIONS.contains(entry.getType());
-			if (!isGroundItemAction)
-			{
-				continue;
-			}
-
-			String plainOption = Text.removeTags(entry.getOption());
-			boolean isTakeOption = "Take".equals(plainOption);
-			if (!isTakeOption)
+			if (!GroundLootIconsPlugin.isGroundItemTake(entry))
 			{
 				continue;
 			}
 
 			int itemId = entry.getIdentifier();
 			AsyncBufferedImage icon = this.itemManager.getImage(itemId, Integer.MAX_VALUE, false);
-
-			FontMetrics metrics = graphics.getFontMetrics(FontManager.getRunescapeFont());
-			int optionWidth = metrics.stringWidth(plainOption + " ");
 
 			int rowIndexFromTop = entries.length - 1 - i;
 			int visibleRowIndex = rowIndexFromTop - scroll;
